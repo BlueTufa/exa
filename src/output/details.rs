@@ -63,9 +63,10 @@
 use std::io::{Write, Error as IOError, Result as IOResult};
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
+use std::env;
 use std::vec::IntoIter as VecIntoIter;
 
-use ansi_term::{ANSIGenericString, Style};
+use ansi_term::{ANSIGenericString, ANSIString, Style};
 
 use crate::fs::{Dir, File};
 use crate::fs::dir_action::RecurseOptions;
@@ -433,22 +434,39 @@ impl<'a> Iterator for TableIter<'a> {
                     cell
                 };
 
-            for tree_part in self.tree_trunk.new_row(row.tree) {
-                cell.push(self.tree_style.paint(tree_part.ascii_art()), 4);
-            }
+            // for tree_part in self.tree_trunk.new_row(row.tree) {
+            //     cell.push(self.tree_style.paint(tree_part.ascii_art()), 4);
+            // }
 
             // If any tree characters have been printed, then add an extra
             // space, which makes the output look much better.
-            if !row.tree.is_at_root() {
-                cell.add_spaces(1);
-            }
-
+            // if !row.tree.is_at_root() {
+            //     cell.add_spaces(1);
+            // }
+            // cell.append(path);
+            // let cell2 = TextCell(TextCellContents(ANSIGenericString::from(format!("{}{}", path, row.name))))
+            let path = get_path().unwrap().full_path;
+            // let path =;
+            cell.push(ANSIString::from(path), 0);
             cell.append(row.name);
             cell
         })
     }
 }
 
+fn get_path() -> std::io::Result<Path> {
+    let buf = env::current_dir()?;
+    let full_path =  buf.display().to_string();
+    // let fullPath =  String::from(stringy);
+    Ok(Path{ full_path })
+}
+// fn do_something3<S: AsRef<str>>(o: &Option<S>) {
+//     let _a: Option<&str> = o.as_ref().map(|s| s.as_ref());
+//     let _b: Option<String> = o.as_ref().map(|r| r.as_ref().to_string());
+// }
+pub struct Path {
+    full_path: String
+}
 
 pub struct Iter {
     tree_trunk: TreeTrunk,
@@ -463,15 +481,17 @@ impl Iterator for Iter {
         self.inner.next().map(|row| {
             let mut cell = TextCell::default();
 
-            for tree_part in self.tree_trunk.new_row(row.tree) {
-                cell.push(self.tree_style.paint(tree_part.ascii_art()), 4);
-            }
+            //for tree_part in self.tree_trunk.new_row(row.tree) {
+                //println!("{}", tree_part.)
+
+                // cell.push(self.tree_style.paint(tree_part.ascii_art()), 4);
+            //}
 
             // If any tree characters have been printed, then add an extra
             // space, which makes the output look much better.
-            if !row.tree.is_at_root() {
-                cell.add_spaces(1);
-            }
+            let path = get_path().unwrap().full_path;
+            // let path =;
+            cell.push(ANSIString::from(path), 0);
 
             cell.append(row.name);
             cell
